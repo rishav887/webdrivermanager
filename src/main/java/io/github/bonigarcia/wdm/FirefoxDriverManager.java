@@ -17,7 +17,6 @@
 package io.github.bonigarcia.wdm;
 
 import static io.github.bonigarcia.wdm.DriverManagerType.FIREFOX;
-import static io.github.bonigarcia.wdm.OperatingSystem.MAC;
 import static java.util.Arrays.asList;
 
 import java.io.IOException;
@@ -54,10 +53,7 @@ public class FirefoxDriverManager extends WebDriverManager {
     protected String getCurrentVersion(URL url, String driverName) {
         String currentVersion = url.getFile().substring(
                 url.getFile().indexOf('-') + 1, url.getFile().lastIndexOf('-'));
-        if (currentVersion.startsWith("v")) {
-            currentVersion = currentVersion.substring(1);
-        }
-        return currentVersion;
+        return currentVersion.startsWith("v") ? currentVersion.substring(1) : currentVersion;
     }
 
     @Override
@@ -82,6 +78,6 @@ public class FirefoxDriverManager extends WebDriverManager {
 
     @Override
     protected boolean shouldCheckArchitecture() {
-        return !config().getOs().contains(MAC.name());
+        return !OperatingSystem.MAC.equals(config().getOs());
     }
 }

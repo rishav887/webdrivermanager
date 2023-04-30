@@ -16,11 +16,9 @@
  */
 package io.github.bonigarcia.wdm;
 
-import static io.github.bonigarcia.wdm.DriverManagerType.CHROME;
-import static java.util.Arrays.asList;
-
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -31,37 +29,41 @@ import java.util.List;
  */
 public class ChromeDriverManager extends WebDriverManager {
 
+    private static final String CHROME_DRIVER_VERSION_KEY = "wdm.chromeDriverVersion";
+    private static final String CHROME_DRIVER_URL_KEY = "wdm.chromeDriverUrl";
+    private static final String CHROME_DRIVER_MIRROR_URL_KEY = "wdm.chromeDriverMirrorUrl";
+    private static final String CHROME_DRIVER_EXPORT_PARAM_KEY = "wdm.chromeDriverExport";
+    private static final List<String> CHROME_DRIVER_NAME = Collections.singletonList("chromedriver");
+
     public static synchronized WebDriverManager getInstance() {
         return chromedriver();
     }
 
     public ChromeDriverManager() {
-        driverManagerType = CHROME;
-        exportParameterKey = "wdm.chromeDriverExport";
-        driverVersionKey = "wdm.chromeDriverVersion";
-        driverUrlKey = "wdm.chromeDriverUrl";
-        driverMirrorUrlKey = "wdm.chromeDriverMirrorUrl";
-        driverName = asList("chromedriver");
+        driverManagerType = DriverManagerType.CHROME;
+        exportParameterKey = CHROME_DRIVER_EXPORT_PARAM_KEY;
+        driverVersionKey = CHROME_DRIVER_VERSION_KEY;
+        driverUrlKey = CHROME_DRIVER_URL_KEY;
+        driverMirrorUrlKey = CHROME_DRIVER_MIRROR_URL_KEY;
+        driverName = CHROME_DRIVER_NAME;
     }
 
     @Override
     protected List<URL> getDrivers() throws IOException {
         URL driverUrl = config().getDriverUrl(driverUrlKey);
-        List<URL> urls;
         if (isUsingTaobaoMirror()) {
-            urls = getDriversFromMirror(driverUrl);
+            return getDriversFromMirror(driverUrl);
         } else {
-            urls = getDriversFromXml(driverUrl);
+            return getDriversFromXml(driverUrl);
         }
-        return urls;
     }
 
     @Override
     protected String getCurrentVersion(URL url, String driverName) {
         if (isUsingTaobaoMirror()) {
-            int i = url.getFile().lastIndexOf(SLASH);
-            int j = url.getFile().substring(0, i).lastIndexOf(SLASH) + 1;
-            return url.getFile().substring(j, i);
+            int lastSlashIndex = url.getFile().lastIndexOf('/');
+            int secondLastSlashIndex = url.getFile().substring(0, lastSlashIndex).lastIndexOf('/') + 1;
+            return url.getFile().substring(secondLastSlashIndex, lastSlashIndex);
         } else {
             return super.getCurrentVersion(url, driverName);
         }
